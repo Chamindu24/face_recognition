@@ -1,0 +1,7 @@
+# Ignore large model files
+faces_data.pkl
+names.pkl
+*.pkl
+*.h5
+*.pt
+*.csv
