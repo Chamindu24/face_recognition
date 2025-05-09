@@ -53,7 +53,7 @@ while True:
     cv2.imshow("Frame",imgBackground)
     k=cv2.waitKey(1)
     if k==ord('o'):
-        speak("Attendance Taken..")
+        speak(f"Attendance taken for {output[0]}")
         time.sleep(5)
         if exist:
             with open("Attendance/Attendance_" + date + ".csv", "+a") as csvfile:

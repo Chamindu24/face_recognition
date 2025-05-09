@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FizzBuzz Attendance Viewer</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #333;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #0077b6;
+    }
+    #status {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 90%;
+      margin: auto;
+      border-collapse: collapse;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 10px 15px;
+      border: 1px solid #ccc;
+    }
+    th {
+      background-color: #caf0f8;
+    }
+    tr:nth-child(even) {
+      background-color: #e0f7fa;
+    }
+    .highlight {
+      background-color: #ffd166 !important;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>FizzBuzz Auto Refresh Viewer</h1>
+  <div id="status">Loading...</div>
+  <div id="timestamp"></div>
+  <table id="data-table">
+    <thead id="table-head"></thead>
+    <tbody id="table-body"></tbody>
+  </table>
+
+  <script>
+    function fetchData() {
+      fetch('/data')
+        .then(response => response.json())
+        .then(json => {
+          document.getElementById("status").innerText = json.status;
+          document.getElementById("timestamp").innerText = "Updated at: " + json.timestamp;
+
+          const head = document.getElementById("table-head");
+          const body = document.getElementById("table-body");
+
+          head.innerHTML = "";
+          body.innerHTML = "";
+
+          if (json.columns.length > 0) {
+            const row = document.createElement("tr");
+            json.columns.forEach(col => {
+              const th = document.createElement("th");
+              th.innerText = col;
+              row.appendChild(th);
+            });
+            head.appendChild(row);
+
+            // Compute max of each column (numerical only)
+            const colMax = {};
+            json.columns.forEach(col => {
+              const nums = json.data.map(d => parseFloat(d[col])).filter(n => !isNaN(n));
+              if (nums.length > 0) {
+                colMax[col] = Math.max(...nums);
+              }
+            });
+
+            // Add rows
+            json.data.forEach(rowData => {
+              const tr = document.createElement("tr");
+              json.columns.forEach(col => {
+                const td = document.createElement("td");
+                td.innerText = rowData[col];
+                if (!isNaN(rowData[col]) && parseFloat(rowData[col]) === colMax[col]) {
+                  td.classList.add("highlight");
+                }
+                tr.appendChild(td);
+              });
+              body.appendChild(tr);
+            });
+          } else {
+            const tr = document.createElement("tr");
+            const td = document.createElement("td");
+            td.colSpan = 100;
+            td.innerText = "No attendance data found.";
+            tr.appendChild(td);
+            body.appendChild(tr);
+          }
+        });
+    }
+
+    fetchData();
+    setInterval(fetchData, 2000);
+  </script>
+</body>
+</html>
